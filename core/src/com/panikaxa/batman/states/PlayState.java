@@ -1,7 +1,9 @@
 package com.panikaxa.batman.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -15,12 +17,14 @@ import com.panikaxa.batman.sprites.Bird;
 import com.panikaxa.batman.sprites.Tube;
 
 
-public class PlayState extends State {
+public class PlayState implements Screen {
 
     private static final int TUBE_SPACING = 125;
     private static final int TUBE_COUNT = 4;
     private static final int GROUND_Y_OFFSET = -30;
 
+    final Batman batman;
+    OrthographicCamera camera;
     private Bird bird;
     private Texture bg;
     private Texture end;
@@ -34,12 +38,11 @@ public class PlayState extends State {
 
     private Array<Tube> tubes;
 
-    public PlayState(GameStateManager gsm) {
-        super(gsm);
-
+    public PlayState(final Batman bat) {
+        this.batman = bat;
         currentState = GameState.READY;
         bird = new Bird(50, 230);
-
+        camera = new OrthographicCamera();
         camera.setToOrtho(false, Batman.WIDHT/2,
                 Batman.HEIGHT/2);
         bg = new Texture("bg.png");
@@ -83,8 +86,8 @@ public class PlayState extends State {
     }
     */
 
-    @Override
-    protected void handleInput() {
+
+    public void handleInput() {
 
         if (Gdx.input.justTouched() && isReady()) {
             start();
@@ -94,12 +97,12 @@ public class PlayState extends State {
             bird.jump();
         }
         if (Gdx.input.justTouched() && isGameOver()) {
+            batman.setScreen(new GameOver(batman));
+            dispose();
             restart();
-            gsm.set(new GameOver(gsm));
         }
     }
 
-    @Override
     public void update(float dt) {
 
         switch (currentState) {
@@ -140,6 +143,7 @@ public class PlayState extends State {
                 currentState = GameState.GAMEOVER;
             }
         }
+
         camera.update();
     }
 
@@ -149,28 +153,29 @@ public class PlayState extends State {
     }
 
     @Override
-    public void render(SpriteBatch sb) {
-        sb.setProjectionMatrix(camera.combined);
+    public void render(float dt) {
+
+        batman.batch.setProjectionMatrix(camera.combined);
 
         shapeRenderer.setProjectionMatrix(camera.combined);
 
-        sb.begin();
-        sb.draw(bg, camera.position.x-(camera.viewportWidth/2), 0);
+        batman.batch.begin();
+        batman.batch.draw(bg, camera.position.x-(camera.viewportWidth/2), 0);
 
         for (Tube tube : tubes) {
-            sb.draw(tube.getTopTube(), tube.getPosTopTube().x, tube.getPosTopTube().y);
-            sb.draw(tube.getBottomTube(), tube.getPosBotTube().x, tube.getPosBotTube().y);
+            batman.batch.draw(tube.getTopTube(), tube.getPosTopTube().x, tube.getPosTopTube().y);
+            batman.batch.draw(tube.getBottomTube(), tube.getPosBotTube().x, tube.getPosBotTube().y);
         }
 
-        sb.draw(ground,groundPos1.x, groundPos1.y);
-        sb.draw(ground,groundPos2.x, groundPos2.y);
-
+        batman.batch.draw(ground,groundPos1.x, groundPos1.y);
+        batman.batch.draw(ground,groundPos2.x, groundPos2.y);
         if (bird.isAlive()) {
-            sb.draw(bird.getBird(), bird.getPosition().x, bird.getPosition().y);
+            batman.batch.draw(bird.getBird(), bird.getPosition().x, bird.getPosition().y);
         } else {
-            sb.draw(getEnd(), bird.getPosition().x +20, bird.getPosition().y);
+            batman.batch.draw(getEnd(), bird.getPosition().x +20, bird.getPosition().y);
         }
-        sb.end();
+        batman.batch.end();
+        update(dt);
 
         /* Отрисовка прямоугольников
         Gdx.gl.glEnable(GL_BLEND);
@@ -200,6 +205,34 @@ public class PlayState extends State {
                 getBoundsGround2().width, getBoundsGround2().height);
         shapeRenderer.end();
         */
+    }
+
+    @Override
+    public void show() {
+
+    }
+
+
+    @Override
+    public void resize(int width, int height) {
+
+    }
+
+    @Override
+    public void pause() {
+
+        bird.stop();
+
+    }
+
+    @Override
+    public void resume() {
+        bird.onRestart();
+    }
+
+    @Override
+    public void hide() {
+
     }
 
     @Override
