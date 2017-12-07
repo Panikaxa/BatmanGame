@@ -19,7 +19,6 @@ public class Bird {
     private Sound flap;
     private boolean isAlive;
 
-
     public  Bird (int x, int y) {
         movement = 100;
         gravity = -15;
@@ -40,8 +39,6 @@ public class Bird {
     public TextureRegion getBird() {
         return birdAnimation.getFrame();
     }
-
-
 
     public void update(float dt) {
         birdAnimation.update(dt);

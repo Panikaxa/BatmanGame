@@ -5,37 +5,33 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.panikaxa.batman.Batman;
 import com.panikaxa.batman.sprites.Animation;
 import com.panikaxa.batman.sprites.Bird;
+import com.panikaxa.batman.sprites.Ground;
 import com.panikaxa.batman.sprites.Tube;
+import static com.badlogic.gdx.graphics.GL20.GL_BLEND;
 
 
 public class PlayState implements Screen {
 
     private static final int TUBE_SPACING = 125;
     private static final int TUBE_COUNT = 4;
-    private static final int GROUND_Y_OFFSET = -30;
+
 
     final Batman batman;
     OrthographicCamera camera;
     private Bird bird;
+    private Ground ground;
     private Texture bg;
     private Texture end;
     private Animation endAnim;
-    private Texture ground;
-    private Vector2 groundPos1, groundPos2;
-    private Rectangle boundsGround1, boundsGround2;
     private ShapeRenderer shapeRenderer;
     private Sound endSound;
     private GameState currentState;
-
     private Array<Tube> tubes;
 
     public PlayState(final Batman bat) {
@@ -45,21 +41,11 @@ public class PlayState implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Batman.WIDHT/2,
                 Batman.HEIGHT/2);
+        ground = new Ground(camera.position.x-(camera.viewportWidth/2));
         bg = new Texture("bg.png");
         end = new Texture("end.png");
         endAnim = new Animation(new TextureRegion(end), 5, 0.5f);
         endSound = Gdx.audio.newSound(Gdx.files.internal("4.wav"));
-        // Земля
-        ground = new Texture("ground.png");
-        groundPos1 = new Vector2(camera.position.x-(camera.viewportWidth/2), GROUND_Y_OFFSET);
-        groundPos2 = new Vector2((camera.position.x-(camera.viewportWidth/2))
-                + ground.getWidth() , GROUND_Y_OFFSET);
-
-        boundsGround1 = new Rectangle(groundPos1.x, groundPos1.y, ground.getWidth(),
-                ground.getHeight());
-        boundsGround2 = new Rectangle(groundPos2.x, groundPos2.y, ground.getWidth(),
-                ground.getHeight());
-
 
         tubes = new Array<Tube>();
 
@@ -76,15 +62,6 @@ public class PlayState implements Screen {
     public enum GameState {
         READY, RUNNING, GAMEOVER
     }
-
-    /*
-    public Rectangle getBoundsGround1 () {
-        return boundsGround1;
-    }
-    public Rectangle getBoundsGround2 () {
-        return boundsGround2;
-    }
-    */
 
 
     public void handleInput() {
@@ -117,12 +94,11 @@ public class PlayState implements Screen {
         }
     }
 
-
     private void updateRunning(float dt) {
 
         endAnim.update(dt);
         handleInput();
-        updateGround();
+        ground.update(camera.position.x - (camera.viewportWidth/2));
         bird.update(dt);
         camera.position.x = bird.getPosition().x + 80;
 
@@ -135,7 +111,7 @@ public class PlayState implements Screen {
             }
 
             if (tube.collides(bird.getBoundsBird(), bird.getBoundsBird1()) ||
-                    collides(bird.getBoundsBird(), bird.getBoundsBird1())) {
+                    ground.collides(bird.getBoundsBird(), bird.getBoundsBird1())) {
                 if (bird.isAlive()) {
                     bird.stop();
                     endSound.play();
@@ -149,7 +125,6 @@ public class PlayState implements Screen {
 
     private void updateReady() {
         handleInput();
-        // Пока ничего не делаем
     }
 
     @Override
@@ -167,9 +142,9 @@ public class PlayState implements Screen {
             batman.batch.draw(tube.getBottomTube(), tube.getPosBotTube().x, tube.getPosBotTube().y);
         }
 
-        batman.batch.draw(ground,groundPos1.x, groundPos1.y);
-        batman.batch.draw(ground,groundPos2.x, groundPos2.y);
-        if (bird.isAlive()) {
+        batman.batch.draw(ground.getGround(),ground.getGroundPos1().x, ground.getGroundPos1().y);
+        batman.batch.draw(ground.getGround(),ground.getGroundPos2().x, ground.getGroundPos2().y);
+        if (!isGameOver()) {
             batman.batch.draw(bird.getBird(), bird.getPosition().x, bird.getPosition().y);
         } else {
             batman.batch.draw(getEnd(), bird.getPosition().x +20, bird.getPosition().y);
@@ -177,7 +152,7 @@ public class PlayState implements Screen {
         batman.batch.end();
         update(dt);
 
-        /* Отрисовка прямоугольников
+       /* //Отрисовка прямоугольников
         Gdx.gl.glEnable(GL_BLEND);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(255,255,255, 0.5f);
@@ -199,19 +174,18 @@ public class PlayState implements Screen {
             shapeRenderer.rect(tube.getBoundsBot3().x, tube.getBoundsBot3().y,
                     tube.getBoundsBot3().width, tube.getBoundsBot3().height);
         }
-        shapeRenderer.rect(getBoundsGround1().x, getBoundsGround1().y,
-                getBoundsGround1().width, getBoundsGround1().height);
-        shapeRenderer.rect(getBoundsGround2().x, getBoundsGround2().y,
-                getBoundsGround2().width, getBoundsGround2().height);
-        shapeRenderer.end();
-        */
+        shapeRenderer.rect(ground.getBoundsGround1().x, ground.getBoundsGround1().y,
+                ground.getBoundsGround1().width, ground.getBoundsGround1().height);
+        shapeRenderer.rect(ground.getBoundsGround2().x, ground.getBoundsGround2().y,
+                ground.getBoundsGround2().width, ground.getBoundsGround2().height);
+        shapeRenderer.end();*/
+
     }
 
     @Override
     public void show() {
 
     }
-
 
     @Override
     public void resize(int width, int height) {
@@ -220,14 +194,13 @@ public class PlayState implements Screen {
 
     @Override
     public void pause() {
-
         bird.stop();
-
+        currentState = GameState.READY;
     }
 
     @Override
     public void resume() {
-        bird.onRestart();
+
     }
 
     @Override
@@ -246,26 +219,9 @@ public class PlayState implements Screen {
             tube.dispose();
     }
 
-    private void updateGround(){
-        if (camera.position.x - (camera.viewportWidth/2) > groundPos1.x + ground.getWidth())
-            groundPos1.add(ground.getWidth()*2, 0);
-            boundsGround1.setPosition(groundPos1.x, groundPos1.y);
-        if (camera.position.x - (camera.viewportWidth/2) > groundPos2.x + ground.getWidth())
-            groundPos2.add(ground.getWidth()*2, 0);
-            boundsGround2.setPosition(groundPos2.x, groundPos2.y);
-    }
-
-    private boolean collides (Rectangle player, Rectangle player1) {
-        return player.overlaps(boundsGround1) || player.overlaps(boundsGround2) ||
-                player1.overlaps(boundsGround1) || player1.overlaps(boundsGround2);
-    }
-
-    private boolean isReady() {
-        return currentState == GameState.READY;
-    }
-
     private void start() {
         currentState = GameState.RUNNING;
+        bird.onRestart();
     }
 
     private void restart() {
@@ -273,11 +229,15 @@ public class PlayState implements Screen {
         bird.onRestart();
     }
 
-    private boolean isGameOver() {
-        return currentState == GameState.GAMEOVER;
+    private boolean isReady() {
+        return currentState == GameState.READY;
     }
 
     private boolean isRunning() {
         return currentState == GameState.RUNNING;
+    }
+
+    private boolean isGameOver() {
+        return currentState == GameState.GAMEOVER;
     }
 }

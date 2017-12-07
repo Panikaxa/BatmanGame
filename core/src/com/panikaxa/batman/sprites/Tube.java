@@ -34,8 +34,8 @@ public class Tube {
         return posBotTube;
     }
 
-    /*
-    public Rectangle getBoundsTop(){
+
+   /* public Rectangle getBoundsTop(){
         return  boundsTop;
     }
     public Rectangle getBoundsTop2(){
@@ -52,8 +52,8 @@ public class Tube {
     }
     public Rectangle getBoundsBot3(){
         return  boundsBot3;
-    }
-    */
+    }*/
+
 
     public Tube(float x) {
         topTube = new Texture("toptube.png");
