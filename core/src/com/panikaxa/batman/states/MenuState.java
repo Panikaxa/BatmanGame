@@ -4,15 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.panikaxa.batman.Batman;
+import com.panikaxa.batman.sprites.BackgroundMenu;
 
 public class MenuState implements Screen {
 
     final Batman batman;
-    private Texture background;
-    private Texture playBtn;
+    private BackgroundMenu backgroundMenu;
     OrthographicCamera camera;
 
     public MenuState(final Batman bat) {
@@ -20,27 +18,14 @@ public class MenuState implements Screen {
        camera = new OrthographicCamera();
        camera.setToOrtho(false, Batman.WIDHT/2,
                 Batman.HEIGHT/2);
-       background = new Texture("bg.png");
-       playBtn = new Texture("playbtn.png");
+       backgroundMenu = new BackgroundMenu();
+
     }
 
     @Override
     public void show() {
 
     }
-
-   /* @Override
-    protected void handleInput() {
-        if (Gdx.input.justTouched()) {
-            gsm.set (new PlayState(gsm));
-        }
-    }*/
-
-   /* @Override
-    public void update(float dt) {
-        handleInput();
-
-    }*/
 
     @Override
     public void render(float dt) {
@@ -49,8 +34,9 @@ public class MenuState implements Screen {
         camera.update();
         batman.batch.setProjectionMatrix(camera.combined);
         batman.batch.begin();
-        batman.batch.draw(background, 0, 0);
-        batman.batch.draw(playBtn, camera.position.x - playBtn.getWidth()/2, camera.position.y-30 );
+        batman.batch.draw(backgroundMenu.getBackground(), 0, 0);
+        batman.batch.draw(backgroundMenu.getPlayBtn(), camera.position.x -
+                backgroundMenu.getPlayBtn().getWidth()/2, camera.position.y-30 );
         batman.batch.end();
 
         if (Gdx.input.justTouched()) {
@@ -81,7 +67,6 @@ public class MenuState implements Screen {
 
     @Override
     public void dispose() {
-        background.dispose();
-        playBtn.dispose();
+        backgroundMenu.dispose();
     }
 }

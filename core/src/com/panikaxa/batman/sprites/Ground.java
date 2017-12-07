@@ -8,10 +8,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
-/**
- * Created by PEV on 07.12.2017.
- */
-
 public class Ground {
 
     private static final int GROUND_Y_OFFSET = -30;
