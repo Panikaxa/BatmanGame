@@ -14,6 +14,7 @@ public class Batman extends Game {
 	public SpriteBatch batch;
 	private Music music;
 
+
 	@Override
 	public void create () {
 		batch = new SpriteBatch();

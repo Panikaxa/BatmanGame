@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
@@ -21,10 +23,14 @@ public class PlayState implements Screen {
 
     private static final int TUBE_SPACING = 125;
     private static final int TUBE_COUNT = 4;
+    BitmapFont font, shadow;
+
+    private int score = 0;
 
 
     final Batman batman;
     OrthographicCamera camera;
+    OrthographicCamera camera2;
     private Bird bird;
     private Ground ground;
     private Texture bg;
@@ -35,13 +41,23 @@ public class PlayState implements Screen {
     private GameState currentState;
     private Array<Tube> tubes;
 
+    float ratew, x;
+    float rateh, y;
+
     public PlayState(final Batman bat) {
         this.batman = bat;
         currentState = GameState.READY;
         bird = new Bird(50, 230);
+        float aspectRatio = (float) Gdx.graphics.getWidth()/Gdx.graphics.getHeight();
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, Batman.WIDHT/2,
-                Batman.HEIGHT/2);
+        camera.setToOrtho(false, Batman.HEIGHT/2*aspectRatio,Batman.HEIGHT/2);
+        camera2 = new OrthographicCamera();
+        camera2.setToOrtho(false, Batman.HEIGHT*aspectRatio, Batman.HEIGHT);
+
+        ratew = camera2.viewportWidth/camera.viewportWidth;
+        rateh = camera2.viewportHeight/camera.viewportHeight;
+
+
         ground = new Ground(camera.position.x-(camera.viewportWidth/2));
         bg = new Texture("bg.png");
         end = new Texture("end.png");
@@ -54,6 +70,10 @@ public class PlayState implements Screen {
             tubes.add(new Tube(i * (TUBE_SPACING + Tube.TUBE_WIDTH)));
         }
         shapeRenderer = new ShapeRenderer();
+
+        font = new BitmapFont(Gdx.files.internal("font.fnt"));
+        //font.setScale(.25f, -.25f);
+
 
     }
 
@@ -108,6 +128,7 @@ public class PlayState implements Screen {
         ground.update(camera.position.x - (camera.viewportWidth/2));
         bird.update(dt);
         camera.position.x = bird.getPosition().x + 80;
+        camera2.position.x =  camera.position.x;
 
         for (int i = 0; i < tubes.size; i++) {
             Tube tube = tubes.get(i);
@@ -125,9 +146,15 @@ public class PlayState implements Screen {
                 }
                 currentState = GameState.GAMEOVER;
             }
+
+            if (!tube.getIsScored() && tube.getPosTopTube().x < bird.getPosition().x) {
+                addScore(1);
+                tube.setIsScored(true);
+            }
         }
 
         camera.update();
+        camera2.update();
     }
 
     private void updateReady() {
@@ -139,10 +166,14 @@ public class PlayState implements Screen {
 
         batman.batch.setProjectionMatrix(camera.combined);
 
+
+
         shapeRenderer.setProjectionMatrix(camera.combined);
 
         batman.batch.begin();
         batman.batch.draw(bg, camera.position.x-(camera.viewportWidth/2), 0);
+
+
 
         for (Tube tube : tubes) {
             batman.batch.draw(tube.getTopTube(), tube.getPosTopTube().x, tube.getPosTopTube().y);
@@ -156,7 +187,13 @@ public class PlayState implements Screen {
         } else {
             batman.batch.draw(getEnd(), bird.getPosition().x +20, bird.getPosition().y);
         }
+        batman.batch.setProjectionMatrix(camera2.combined);
+        x = camera2.position.x - 3 * getScore(score).length();
+        y = camera2.position.y*rateh;
+        font.draw(batman.batch, " " + getScore(score), x, y);
+
         batman.batch.end();
+
         update(dt);
 
        /* //Отрисовка прямоугольников
@@ -222,6 +259,7 @@ public class PlayState implements Screen {
         ground.dispose();
         bird.dispose();
         endSound.dispose();
+        font.dispose();
         for (Tube tube : tubes)
             tube.dispose();
     }
@@ -246,5 +284,15 @@ public class PlayState implements Screen {
 
     private boolean isGameOver() {
         return currentState == GameState.GAMEOVER;
+    }
+
+
+    public String getScore(int score) {
+        String scor = score + "";
+        return scor;
+    }
+
+    public void addScore(int increment) {
+        score += increment;
     }
 }

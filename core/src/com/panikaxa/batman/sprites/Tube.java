@@ -17,6 +17,7 @@ public class Tube {
     private Vector2 posTopTube, posBotTube;
     private Random rand;
     private Rectangle boundsTop, boundsTop2, boundsTop3, boundsBot, boundsBot2, boundsBot3;
+    private boolean isScored;
 
     public Texture getTopTube() {
         return topTube;
@@ -32,6 +33,14 @@ public class Tube {
 
     public Vector2 getPosBotTube() {
         return posBotTube;
+    }
+
+    public boolean getIsScored(){
+        return isScored;
+    }
+
+    public void setIsScored(boolean s){
+        isScored = s;
     }
 
 
@@ -59,6 +68,7 @@ public class Tube {
         topTube = new Texture("toptube.png");
         bottomTube = new Texture("bottomtube.png");
         rand = new Random();
+        isScored = false;
 
         posTopTube = new Vector2(x, rand.nextInt(FLUCTUATION) + TUBE_GAP + LOWEST_OPENING);
         posBotTube = new Vector2(x, posTopTube.y - TUBE_GAP - bottomTube.getHeight());
@@ -76,7 +86,7 @@ public class Tube {
     }
 
     public void reposition (float x) {
-
+        setIsScored(false);
         posTopTube.set(x, rand.nextInt(FLUCTUATION) + TUBE_GAP + LOWEST_OPENING);
         posBotTube.set(x, posTopTube.y - TUBE_GAP - bottomTube.getHeight());
         boundsTop.setPosition(posTopTube.x, posTopTube.y+40);
