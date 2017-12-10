@@ -123,7 +123,6 @@ public class PlayState implements Screen {
     }
 
     private void updateRunning(float dt) {
-
         endAnim.update(dt);
         handleInput();
         ground.update(camera.position.x - (camera.viewportWidth/2));
@@ -164,7 +163,7 @@ public class PlayState implements Screen {
     }
 
     private void updateReady() {
-        //handleInput();
+        handleInput();
     }
 
     @Override
@@ -205,7 +204,7 @@ public class PlayState implements Screen {
                     else if (startTime <= 3 && startTime > 2) s = "2";
                     else if (startTime <= 2 && startTime > 1) s = "1";
                     else if (startTime <= 1 && startTime > 0) s = "go";
-                    else if (startTime <=0) currentState = GameState.RUNNING;
+                    else if (startTime <=0) start();
             }
             font1.draw(batman.batch, s, x, y / 1.5f);
         }
