@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector3;
 public class Bird {
 
     private int movement;
+    private float movK = 1;
     private int gravity;
     private Vector3 position;
     private Vector3 velosity;
@@ -20,6 +21,7 @@ public class Bird {
     private boolean isAlive;
 
     public  Bird (int x, int y) {
+
         movement = 100;
         gravity = -15;
         position = new Vector3(x, y, 0);
@@ -36,6 +38,10 @@ public class Bird {
         return position;
     }
 
+    public void setVelosity(float velosity){
+        this.movK = velosity;
+    }
+
     public TextureRegion getBird() {
         return birdAnimation.getFrame();
     }
@@ -45,7 +51,7 @@ public class Bird {
         if (position.y > 0)
             velosity.add(0, gravity, 0);
         velosity.scl(dt);
-        position.add(movement * dt, velosity.y, 0);
+        position.add(movement * dt * movK, velosity.y, 0);
         if (position.y < 75)
             position.y = 75;
         velosity.scl(1/dt);
